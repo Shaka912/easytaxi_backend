@@ -4,17 +4,25 @@ const { Schema } = mongoose;
 
 const rideRequestSchema = new Schema({
   origin: {
-    type: { type: String, default: "Point" },
-    coordinates: {
-      type: [Number],
-      required: true,
+    // type: { type: String, default: "Point" },
+    // coordinates: {
+    //   type: [Number],
+    //   required: true,
+    // },
+    location: {
+      lat: { type: Number, required: true },
+      lng: { type: Number, required: true },
     },
   },
   destination: {
-    type: { type: String, default: "Point" },
-    coordinates: {
-      type: [Number],
-      required: true,
+    // type: { type: String, default: "Point" },
+    // coordinates: {
+    //   type: [Number],
+    //   required: true,
+    // },
+    location: {
+      lat: { type: Number, required: true },
+      lng: { type: Number, required: true },
     },
   },
   fare: {
@@ -23,7 +31,6 @@ const rideRequestSchema = new Schema({
   },
   vehicleTier: {
     type: String,
-    required: true,
   },
   requestedAt: {
     type: Date,
@@ -32,7 +39,7 @@ const rideRequestSchema = new Schema({
   status: {
     type: String,
     default: "pending",
-    enum: ["pending", "accepted", "completed", "cancelled","in-progress"],
+    enum: ["pending", "accepted", "completed", "cancelled", "in-progress"],
   },
   acceptedBy: {
     type: mongoose.Schema.Types.ObjectId,
@@ -43,9 +50,9 @@ const rideRequestSchema = new Schema({
     type: String,
     default: null,
   },
-  userid: { type: mongoose.Schema.Types.ObjectId, ref: "users" }, 
+  userid: { type: mongoose.Schema.Types.ObjectId, ref: "users" },
 });
 
-rideRequestSchema.index({ origin: "2dsphere" });
-rideRequestSchema.index({ destination: "2dsphere" });
+// rideRequestSchema.index({ origin: "2dsphere" });
+// rideRequestSchema.index({ destination: "2dsphere" });
 module.exports = mongoose.model("riderequest", rideRequestSchema);

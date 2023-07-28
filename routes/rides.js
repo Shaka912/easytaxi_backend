@@ -5,31 +5,38 @@ const jwt = require("jsonwebtoken");
 const fetchuser = require("../middleware/fetchuser");
 const Riderequest = require("../models/riderequest");
 const Userrating = require("../models/userrating");
-const Driverrating = require("../models/driverrating");
+const Driverrating = require("../models/driverratings");
 const Driver = require("../models/driver");
 const User = require("../models/users");
 const Userdetails = require("../models/userdetails");
 // route: 1 adding users current location and destination by Post request(Login required)
 router.post('/ride-request', async (req, res) => {
-  const { origin, destination, fare, vehicleTier,userid } = req.body;
-  const user = await Userdetails.findOne({userid:userid})
-  if(!user){
-    return res.status(400).json({error:"No User found"})
+  const { origin, destination, fare, vehicleTier,userid,driverid } = req.body;
+  try {
+    const user = await Userdetails.findOne({userid:userid})
+    if(!user){
+      return res.status(400).json({error:"No User found"})
+    }
+    const rideRequest = new Riderequest({
+      origin:origin,
+      destination:destination,
+      fare:fare,
+      vehicleTier:vehicleTier,
+      userid:userid,
+      requestedAt: new Date(),
+      acceptedBy:driverid
+    });
+    await rideRequest.save();
+    user.rideRequests.push(rideRequest._id);
+    // emit this ride request to all drivers
+    //req.app.io.to('drivers').emit('new ride request', rideRequest); // will send new ride request to all drivers. Listen for 'new ride request' events and update the user interface accordingly. This will allow your application to instantly display new ride requests as they're created
+  
+    res.status(200).send( rideRequest );
+  } catch (error) {
+    console.log(error)
+    return res.status(500).send("Some error has occured");
   }
-  const rideRequest = new Riderequest({
-    origin,
-    destination,
-    fare,
-    vehicleTier,
-    userid,
-    requestedAt: new Date(),
-  });
-  await rideRequest.save();
-  user.rideRequests.push(rideRequest._id);
-  // emit this ride request to all drivers
-  req.app.io.to('drivers').emit('new ride request', rideRequest); // will send new ride request to all drivers. Listen for 'new ride request' events and update the user interface accordingly. This will allow your application to instantly display new ride requests as they're created
 
-  res.status(200).send({ success: true, rideRequest });
 });
 
 // route for rating user upon ride completion

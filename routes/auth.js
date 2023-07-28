@@ -6,7 +6,7 @@ const router = express.Router();
 const { body, validationResult } = require("express-validator");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const jwt_secrect = process.env.JWT_SECRECT;
+const jwt_secrect = process.env.JWT_SECRET;
 const fetchuser = require("../middleware/fetchuser");
 // create user endpoint
 router.post(
@@ -18,7 +18,7 @@ router.post(
     }),
     // body("name", "Name must be at least 3characters").isLength({ min: 3 }),
     // body("gender", "PLease specify gender").isLength({ min: 4 }),
-    body("Phonenumber", "Please enter phone number only").isLength({ min: 8 }),
+    body("phonenumber", "Please enter phone number only").isLength({ min: 8 }),
   ],
   async (req, res) => {
     const errors = validationResult(req);
@@ -34,7 +34,7 @@ router.post(
       }
       const salt = await bcrypt.genSalt(10);
       const secpass = await bcrypt.hash(req.body.password, salt);
-
+console.log(process.env.JWT_SECRET)
       user = await User.create({
         password: secpass,
         phonenumber: req.body.phonenumber,
@@ -46,7 +46,7 @@ router.post(
           phone:user.phonenumber
         },
       };
-      const authtoken = jwt.sign(data, jwt_secrect);
+      const authtoken = jwt.sign(data, process.env.JWT_SECRET);
       res.send({authtoken, user})
       console.log(authtoken)
     } catch (error) {
