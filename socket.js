@@ -97,45 +97,19 @@ console.log(`user_${rideDetails.userId}`)
       socket.to("drivers").emit("newRideRequest", rideId);
       socket.to(driverId).emit("rideOfferRejected", rejectedOffer);
     });
-    //socket event once a driver accepts a ride request
-    socket.on("accept ride request", async (data) => {
-      const { rideRequestId, driverId } = data;
 
-      const rideRequest = await Riderequest.findById(rideRequestId);
+    //socket event once the rider accepts ride offer, this event will be used to track driver approaching rider
+    socket.on("driverLocationUpdate",async (data,rideId) =>{
+      const rideRequest = await Riderequest.findById(rideId);
+
       if (!rideRequest) {
         return socket.emit("error", "Ride request not found");
       }
+      console.log(data)
+      io.to(`user_${rideRequest.userId}`).emit("driverLocation", data);
+    })
 
-      if (new Date() - rideRequest.requestedAt > 5 * 60 * 1000) {
-        return socket.emit("error", "Ride request expired");
-      }
 
-      if (rideRequest.acceptedBy) {
-        return socket.emit(
-          "error",
-          "Ride request already accepted by another driver"
-        );
-      }
-      // Generate a unique chatRoomId for this ride
-      rideRequest.chatRoomId = `ride_${rideRequestId}`;
-      rideRequest.status = "accepted";
-      rideRequest.acceptedBy = driverId;
-      await rideRequest.save();
-      // The driver joins the chat room
-      socket.join(rideRequest.chatRoomId);
-      // Notify the user that their ride request was accepted
-      const userId = rideRequest.userid;
-      io.to(userId).emit("ride request accepted", {
-        rideRequestId,
-        driverId,
-        chatRoomId: rideRequest.chatRoomId,
-      });
-      socket.emit("chat room joined", rideRequest.chatRoomId);
-      // Emit an 'ride request accepted' event, including the ID of the ride request that was accepted.
-      // This will be received by all connected clients.
-      //and listen this event on client side to change ui accordingly
-      io.emit("ride request accepted", rideRequestId);
-    });
     //socket event once the ride is started , this event can be started from driver side.
     socket.on("startride", async ({ rideRequestId }) => {
       const rideRequest = await Riderequest.findById(rideRequestId);
@@ -147,7 +121,7 @@ console.log(`user_${rideDetails.userId}`)
       rideRequest.status = "in-progress";
       await rideRequest.save();
       // Emitting an event to user that the ride is started so we can update the UI accordingly
-      io.to(`user_${rideRequest.userId}`).emit("ride started", rideRequest);
+      io.to(`user_${rideRequest.userId}`).emit("rideStarted", rideRequest);
       // Emitting an event to driver that the ride is started so we can update the UI accordingly
       io.to(`driver_${rideRequest.acceptedBy}`).emit(
         "ride started",
