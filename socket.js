@@ -52,11 +52,12 @@ module.exports = (io) => {
     //socket event once drivers submits his desired offer for the fare it will be broadcasted to rider
     socket.on(
       "acceptRideRequest",
-      (name, driverId, userId, carName, rating, price) => {
-        console.log(name, driverId, userId, carName, rating, price)
+      (rideDetails) => {
+        console.log(rideDetails)
         //const offer = { rideId, driverId, modifiedFare };
-        const offer = { name, driverId, carName, rating, price };
-        io.to(`user_${userId}`).emit("rideOffer", offer);
+       // const offer = { name, driverId, carName, rating, price };
+console.log(`user_${rideDetails.userId}`)
+        io.to(`user_${rideDetails.userId}`).emit("rideOffer", rideDetails);
       }
     );
     //socket event once the rider  accepts the ride and offer by the driver
@@ -73,7 +74,7 @@ module.exports = (io) => {
       const rideRequest = await Riderequest.create({
         origin: rideDetails.origin,
         destination: rideDetails.destination,
-        fare: rideDetails.price,
+        fare: rideDetails.fare,
       });
       // Generate a unique chatRoomId for this ride
       rideRequest.chatRoomId = `ride_${rideRequest._id}`;
@@ -84,9 +85,11 @@ module.exports = (io) => {
       socket.to(rideDetails.driverId).emit("offerAccepted", rideRequest);
       // Join the rider and driver to the chat room
       socket.join(rideRequest.chatRoomId);
-      if (users[driverId]) {
-        users[driverId].join(rideRequest.chatRoomId);
-      }
+      if (users[rideDetails.driverId]) {
+    users[rideDetails.driverId].join(rideRequest.chatRoomId);
+  }
+ // Emit an event to the driver who accepted the offer
+  socket.to(rideDetails.driverId).emit("offerAccepted", rideRequest);
     });
 
     socket.on("rejectRideOffer", (rideId, driverId) => {

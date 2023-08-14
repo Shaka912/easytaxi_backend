@@ -42,9 +42,10 @@ const rideRequestSchema = new Schema({
     enum: ["pending", "accepted", "completed", "cancelled", "in-progress"],
   },
   acceptedBy: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "driver", // assuming you have a Driver model
+   // type: mongoose.Schema.Types.ObjectId,
+   // ref: "driver", // assuming you have a Driver model
     default: null,
+type: String,
   },
   chatRoomId: {
     type: String,
