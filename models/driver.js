@@ -1,24 +1,70 @@
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
 
-const { Schema } = mongoose;
+const genderEnum = ['male', 'female', 'other'];
+const vehicle_type = ['sedan', 'mini', 'electric', 'suv', 'courier'];
 
-const driverSchema = new Schema({
-    firstname: String,
-    lastname: String,
-    email: String,
-    phone: String,
-    car: String,
-    car_model: String,
-    car_color: String,
-    car_plate: String,
-    driverid:{ type: mongoose.Schema.Types.ObjectId, ref: "driverdetails" },
-    rideRequests: [{ type: Schema.Types.ObjectId, ref: "riderequest" }],
-    ratings: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'driverrating',
-      }], 
-})
+const Driver = new mongoose.Schema({
+  first_name: {
+    type: String,
+    required: true
+  },
+  last_name: {
+    type: String,
+    required: true
+  },
+  email: {
+    type: String,
+    required: true,
+    unique: true
+  },
+  city: {
+    type: String,
+    required: true
+  },
+  phone: {
+    type: String,
+    required: true
+  },
+  gender: { type: String, required: true, enum: genderEnum },
+  isValid: { type: Boolean, default: false },
+  vehicle: {
+    brand: {
+      type: String,
+      required: true
+    },
+    vehicletype: {
+      type: String,
+      required: true,
+      enum: vehicle_type
+    },
+    model: {
+      type: String,
+      required: true
+    },
+    year: {
+      type: Number,
+      required: true
+    },
+    plate_number: {
+      type: String,
+      required: true,
+      unique: true
+    },
+    images: {
+      vehicle_image: {
+        type: String,
+        required: true
+      },
+      license_image: {
+        type: String,
+        required: true
+      },
+      driver_image: {
+        type: String,
+        required: true
+      }
+    }
+  },
+}, { timestamps: true });
 
-const driverModel = mongoose.model("driver", driverSchema);
-
-module.exports = driverModel;
+module.exports = mongoose.model('driver', Driver);

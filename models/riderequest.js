@@ -42,16 +42,23 @@ const rideRequestSchema = new Schema({
     enum: ["pending", "accepted", "completed", "cancelled", "in-progress"],
   },
   acceptedBy: {
-   // type: mongoose.Schema.Types.ObjectId,
-   // ref: "driver", // assuming you have a Driver model
+    // type: mongoose.Schema.Types.ObjectId,
+    // ref: "driver", // assuming you have a Driver model
     default: null,
-type: String,
+    type: String,
   },
   chatRoomId: {
     type: String,
     default: null,
   },
-  userid: { type: mongoose.Schema.Types.ObjectId, ref: "users" },
+  userid: {
+    type: String,
+    default: null,
+  },
+  cancelby: {
+    type: String,
+    default: "",
+  }
 });
 
 // rideRequestSchema.index({ origin: "2dsphere" });

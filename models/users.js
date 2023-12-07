@@ -1,20 +1,22 @@
 const mongoose = require('mongoose');
-const {Schema} = mongoose;
 
+const genderEnum = ['male', 'female', 'other'];
 
-const UserSchema = new Schema ({
-
-    timestamp:{
-        type: Date,
-        default: Date.now
+const dobValidator = {
+    validator: function (value) {
+        const regex = /^\d{2}-\d{2}-\d{4}$/;
+        return regex.test(value);
     },
-    fcmtoken:{type:String},
-    phonenumber:{
-        type: Number,
-        required:true,
-        unique:true
-    }
-});
-const user = mongoose.model("users", UserSchema);
+    message: 'Invalid date of birth format. Please use dd-mm-yyyy.',
+};
 
-module.exports = user; 
+const UserSchema = new mongoose.Schema({
+    name: { type: String, required: true },
+    phone: { type: String, required: true },
+    gender: { type: String, required: true, enum: genderEnum },
+    dob: { type: String, required: true, validate: dobValidator },
+    isValid: { type: Boolean, default: false },
+    image: { type: String }
+}, { timestamps: true });
+
+module.exports = mongoose.model('users', UserSchema);
