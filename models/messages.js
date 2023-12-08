@@ -5,6 +5,7 @@ const MessageSchema = new Schema({
     senderId: String,
     recipientId: String,
     message: String,
+    user:String,
     timestamp: { type: Date, default: Date.now },
   });
   

@@ -8,6 +8,7 @@ const app = express();
 const port = process.env.port || 4000;
 //routes
 const authRoutes = require("./routes/auth");
+const driverRoutes = require("./routes/driver");
 const rideRoutes = require("./routes/rides");
 var bodyParser = require("body-parser");
 const httpServer = http.createServer(app);
@@ -31,7 +32,8 @@ app.use(
 app.use(express.json());
 //Available routes
 app.io = io;
-app.use("/api/auth", authRoutes);
+app.use("/api/v1/user", authRoutes);
+app.use("/api/v1/driver", driverRoutes);
 app.use("/api/rides", rideRoutes);
 app.use("/api/vehicle", require("./routes/Vehicle"));
 //app.use('api/otp', require('./routes/otp'))
