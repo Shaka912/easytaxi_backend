@@ -1,25 +1,66 @@
-// list of vehicle avaialbe for renting 
 const mongoose = require('mongoose');
-const {Schema} = mongoose;
+const { Schema } = mongoose;
 
-const VehicleSchema = new Schema ({
+const vehicleTypes = ['sedan', 'mini', 'electric', 'suv'];
+const controlTypes = ['manual', 'auto'];
+const usageTypes = ['General Use', 'Commercial Use'];
 
-    Name:{
+const VehicleSchema = new Schema({
+    vehicle_type: {
         type: String,
-        required: true
+        required: true,
+        enum: vehicleTypes,
     },
-    Image:{
+    vehicle_name: {
         type: String,
-        required: true
+        required: true,
     },
-    Model:{
+    vehicle_petrol_capacity: {
+        type: Number,
+        required: true,
+    },
+    vehicle_petrol_average: {
+        type: Number,
+        required: true,
+    },
+    vehicle_max_power: {
+        type: Number,
+        required: true,
+    },
+    vehicle_max_speed: {
+        type: Number,
+        required: true,
+    },
+    vehicle_control_type: {
         type: String,
-        required: true
+        required: true,
+        enum: controlTypes,
     },
-    Make:{
-        type:Number,
-        required:true,
+    vehicle_sitting_capacity: {
+        type: Number,
+        required: true,
+    },
+    vehicle_price_per_day: {
+        type: Number,
+        required: true,
+    },
+    vehicle_image: {
+        type: String,
+        required: true,
+    },
+    vehicle_useage: {
+        type: String,
+        required: true,
+        enum: usageTypes,
+    },
+    vehicle_useage_purpose: {
+        type: String,
+        required: true,
+    },
+    vehicle_availability: {
+        type: Boolean,
+        default: true,
     }
 });
-const Vehicle = mongoose.model("Vehicle", VehicleSchema);
-module.exports = Vehicle;
+
+module.exports = mongoose.model('Vehicle', VehicleSchema);

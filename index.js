@@ -10,6 +10,8 @@ const port = process.env.port || 4000;
 const authRoutes = require("./routes/auth");
 const driverRoutes = require("./routes/driver");
 const rideRoutes = require("./routes/rides");
+const VehicleRoutes = require("./routes/Vehicle");
+const BookingRoutes = require("./routes/Booking");
 var bodyParser = require("body-parser");
 const httpServer = http.createServer(app);
 const { Server } = require("socket.io");
@@ -34,8 +36,9 @@ app.use(express.json());
 app.io = io;
 app.use("/api/v1/user", authRoutes);
 app.use("/api/v1/driver", driverRoutes);
+app.use("/api/v1/vehicle", VehicleRoutes);
+app.use("/api/v1/booking", BookingRoutes);
 app.use("/api/rides", rideRoutes);
-app.use("/api/vehicle", require("./routes/Vehicle"));
 //app.use('api/otp', require('./routes/otp'))
 const setupSockets = require("./socket");
 setupSockets(io); // setup your socket listeners

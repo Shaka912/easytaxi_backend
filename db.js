@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const express = require('express');
 const mongouri = process.env.MONGO_DB_URI
+// const mongouri = "mongodb://localhost:27017/hello"
 
 const conecttomongo = async () => {
     mongoose.set("strictQuery", true);

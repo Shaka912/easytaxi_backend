@@ -1,6 +1,9 @@
 var jwt = require('jsonwebtoken');
+const twilio = require('twilio');
 const drivermodel = require('../models/driver')
-const ratingmodel = require('../models/userrating')
+const ratingmodel = require('../models/userrating')//For Giving Rating to User
+const driverrating = require('../models/driverratings')
+const client = twilio(process.env.Account_SID, process.env.Auth_Token);
 
 const SECRET_KEY = 'hello$123'
 
@@ -9,10 +12,25 @@ const Login = async (request, response) => {
     try {
         const checkuser = await drivermodel.findOne({ phone: phone });
         if (checkuser) {
-            response.status(200).json({
-                message: 'User Login Success',
-                data: checkuser._doc,
-            });
+            const otp = Math.floor(100000 + Math.random() * 900000);
+            // Send OTP via Twilio
+            client.messages
+                .create({
+                    body: `Your OTP is: ${otp}`,
+                    from: process.env.Twilio_Number,
+                    to: `+${phone}`,
+                })
+                .then(() => {
+                    response.status(200).json({
+                        message: 'User Login Success',
+                        data: checkuser._doc._id, // Removed unnecessary spread operator
+                        otp: otp
+                    });
+                })
+                .catch((error) => {
+                    console.error(error);
+                    response.status(500).json({ error: 'Failed to send OTP' });
+                });
         } else {
             response.status(200).json({
                 message: 'Phone Number Not Exist',
@@ -64,15 +82,54 @@ const Register = async (request, response) => {
             });
 
             const saveuser = await newDriver.save();
-            response.status(200).json({
-                message: 'User Register Success',
-                data: saveuser,
-            });
+            const otp = Math.floor(100000 + Math.random() * 900000);
+
+            // Send OTP via Twilio
+            client.messages
+                .create({
+                    body: `Your OTP is: ${otp}`,
+                    from: process.env.Twilio_Number,
+                    to: `+${request.body.phone}`,
+                })
+                .then(() => {
+                    response.status(200).json({
+                        message: 'User Register Success',
+                        data: saveuser,
+                        otp: otp
+                    });
+                })
+                .catch((error) => {
+                    console.error(error);
+                    response.status(500).json({ error: 'Failed to send OTP' });
+                });
         } catch (error) {
             console.error(error);
             response.status(500).json({ error: 'Driver Not Created' });
         }
     }
+}
+
+
+const SendAgianOtp = async (request, response) => {
+    const { phone } = request.body
+    const otp = Math.floor(100000 + Math.random() * 900000);
+    // Send OTP via Twilio
+    client.messages
+        .create({
+            body: `Your OTP is: ${otp}`,
+            from: process.env.Twilio_Number,
+            to: `+${phone}`,
+        })
+        .then(() => {
+            response.status(200).json({
+                message: 'OTP has been generated',
+                otp: otp
+            });
+        })
+        .catch((error) => {
+            console.error(error);
+            response.status(500).json({ error: 'Failed to send OTP' });
+        });
 }
 
 const verifyotp = async (request, response) => {
@@ -146,9 +203,30 @@ const driver_to_user = async (request, response) => {
     }
 }
 
+const driver_rating = async (request, response) => {
+    const data = await driverrating.find({ driverinfo: request.user.id });
+
+    // Check if there are ratings before calculating the average
+    if (data.length === 0) {
+        response.status(200).json({
+            message: "No ratings available for this Driver.",
+        });
+        return;
+    }
+
+    const sumOfRatings = data.reduce((acc, item) => acc + item.rating, 0);
+    const averageRating = sumOfRatings / data.length;
+
+    response.status(200).json({
+        data: averageRating,
+    });
+}
+
 module.exports = {
     Login,
     Register,
     verifyotp,
-    driver_to_user
+    driver_to_user,
+    driver_rating,
+    SendAgianOtp
 }
